@@ -6,9 +6,14 @@ Học viên hoàn thiện các mục TODO để hoàn thành bài lab.
 import json
 import os
 import re
+import sys
 from typing import Dict, Any, List, Tuple
 from dotenv import load_dotenv
 from tools import TOOL_MAP, TOOL_DEFINITIONS, get_flight_info, get_weather_forecast
+
+# Ensure standard output supports UTF-8 on Windows consoles
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 load_dotenv()
 
