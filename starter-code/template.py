@@ -7,7 +7,10 @@ import json
 import os
 import re
 from typing import Dict, Any, List, Tuple
+from dotenv import load_dotenv
 from tools import TOOL_MAP, TOOL_DEFINITIONS, get_flight_info, get_weather_forecast
+
+load_dotenv()
 
 SYSTEM_PROMPT = """Bạn là một ReAct Agent thông minh hỗ trợ khách hàng dịch vụ Vingroup (Vinpearl, Xanh SM, VinFast).
 Bạn chỉ được sử dụng các công cụ sau:
@@ -33,16 +36,23 @@ class ChatbotBaseline:
             try:
                 import google.generativeai as genai
                 genai.configure(api_key=self.api_key)
-                model = genai.GenerativeModel('gemini-1.5-flash')
-                response = model.generate_content(
-                    f"Bạn là chatbot tư vấn du lịch. Hãy trả lời câu hỏi sau của khách hàng mà KHÔNG dùng tool hay internet: {user_input}"
-                )
-                return {
-                    "answer": response.text,
-                    "tool_calls": [],
-                    "status": "success",
-                    "mode": "live_api"
-                }
+                response = None
+                for model_name in ['gemini-3.6-flash', 'gemini-1.5-flash', 'gemini-2.5-flash']:
+                    try:
+                        model = genai.GenerativeModel(model_name)
+                        response = model.generate_content(
+                            f"Bạn là chatbot tư vấn du lịch. Hãy trả lời câu hỏi sau của khách hàng mà KHÔNG dùng tool hay internet: {user_input}"
+                        )
+                        break
+                    except Exception:
+                        continue
+                if response:
+                    return {
+                        "answer": response.text,
+                        "tool_calls": [],
+                        "status": "success",
+                        "mode": "live_api"
+                    }
             except Exception:
                 pass
 
